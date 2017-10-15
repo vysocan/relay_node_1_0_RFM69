@@ -171,7 +171,10 @@ void setup() {
   #endif
  
   eeprom_read_block((void*)&conf, (void*)0, sizeof(conf)); // Read current configuration
-  if (conf.version != VERSION) setDefault();
+   if (conf.version != VERSION) {
+    setDefault();
+    eeprom_update_block((const void*)&conf, (void*)0, sizeof(conf)); // Save current configuration
+  }
    
   Serial.begin(115200); 
 
@@ -188,10 +191,11 @@ void loop() {
     previousMillis = millis();
     // Temperature 
     u.fval = (((float)analogRead(A7) * 0.003223)-0.5)*100; 
-    msg[7] = 'T'; // Temperature
-    msg[8] = 0;   // local address
-    msg[9] = u.b[0]; msg[10] = u.b[1]; msg[11] = u.b[2]; msg[12] = u.b[3];
+    msg[0] = 'S'; // Sensor
+    msg[1] = 'T'; // Temperature
+    msg[2] = 0;   // local address
+    msg[3] = u.b[0]; msg[4] = u.b[1]; msg[5] = u.b[2]; msg[6] = u.b[3];
     // Send to GW 
-    radio.sendWithRetry(GATEWAYID, msg, 13);
+    radio.sendWithRetry(GATEWAYID, msg, 7);
   }
 }
